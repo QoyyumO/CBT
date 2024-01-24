@@ -1,6 +1,6 @@
 First completed project using c++.
 Computer Based Testing (CBT) is programmed with c++, an object oriented programming language, which allows a user to login to start the test.
-➢ The application allowsthe bulk upload of questions.
+➢ The application allows the bulk upload of questions.
 ➢ The application facilitates the bulk upload of user login details.
 ➢ In case of incorrect login information, the application prompts the user with a notification of 
 wrong login details and request them to re-login.
