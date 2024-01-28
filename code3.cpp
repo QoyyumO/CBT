@@ -194,36 +194,33 @@ int main() {
 
     // Convert input to lowercase for easier comparison
     startQuizChoice = tolower(startQuizChoice);
-
-    if (startQuizChoice == 'n') {
-        cout << "Quiz aborted. Goodbye!\n";
-        return 0;
-    } else if (startQuizChoice != 'y') {
-        cout << "Invalid choice. Exiting.\n";
-        return 1; // Exit with an error code
-    }
-
-    bool authenticated = false;
-    string username, password;
-
-    // Keep prompting until valid credentials are provided
-    while (!authenticated) {
-        cout << "Enter username: ";
-        cin >> username;
-        cout << "Enter password: ";
-        cin >> password;
-
-        // Authenticate user
-        authenticated = authSystem.authenticateUser(username, password);
-
-        if (!authenticated) {
-            cout << "Authentication failed. Invalid username or password.\n";
-            cout << "Please re-enter your login details.\n";
+        if ( startQuizChoice == 'y' ||  startQuizChoice == 'n') {
+            break;
+        } else {
+            cout << "Invalid choice. Please enter 'Y' or 'N'.\n";
         }
     }
 
-    cout << "Authentication successful. Welcome, " << username << "!\n";
+    if startQuizChoice == 'n') {
+        cout << "Aborted. Goodbye!!\n";
+        return 0;  // End the application
+    }
 
+    if (viewResultChoice == 'y') {
+        // Get username and password from the user
+        string username, password;
+        cout << "Enter your username: ";
+        cin >> username;
+        cout << "Enter your password: ";
+        cin >> password;
+    }
+        // Authenticate user
+        if (authSystem.authenticateUser(username, password)) {
+            cout << "Authentication successful. Welcome, " << username << "!\n";
+            // Add code for the rest of your application here
+        } else {
+            cout << "Authentication failed. Invalid username or password.\n";
+        }
     char userChoice;
 
 
