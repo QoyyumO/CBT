@@ -66,7 +66,6 @@ private:
     size_t currentQuestionIndex; // Added to keep track of the current question
 
 public:
-    
     QuestionManager() : currentQuestionIndex(0) {
         loadQuestionsFromCSV("questions.csv");
     }
@@ -94,7 +93,7 @@ public:
 
         file.close();
     }
-   
+
     void displayCurrentQuestion() const {
         const Question& currentQuestion = questions[currentQuestionIndex];
 
@@ -104,42 +103,54 @@ public:
         }
     }
 
-char getUserInput() const {
-    char userInput;
-    bool validChoice = false;
+    char getUserInput() const {
+        char userInput;
+        bool validChoice = false;
 
-    do {
-        cout << "Enter your answer (A, B, C, D), or 'S' to skip: ";
-        cin >> userInput;
+        do {
+            cout << "Enter your answer (A, B, C, D), 'P' for previous, 'Q' for next, or 'E' to end: ";
+            cin >> userInput;
 
-        // Convert input to uppercase
-        userInput = toupper(userInput);
+            // Convert input to uppercase
+            userInput = toupper(userInput);
 
-        // Check if the input is valid
-        if ((userInput >= 'A' && userInput <= 'D') || userInput == 'S') {
-            validChoice = true;
-        } else {
-            cout << "Invalid choice. Please enter a valid option.\n";
-        }
-    } while (!validChoice);
+            // Check if the input is valid
+            if ((userInput >= 'A' && userInput <= 'D') ||
+                (userInput == 'P' && currentQuestionIndex > 0) || 
+                (userInput == 'Q' && currentQuestionIndex < questions.size() - 1) || 
+                userInput == 'E') {
+                validChoice = true;
+            } else {
+                cout << "Invalid choice. Please enter a valid option.\n";
+            }
+        } while (!validChoice);
 
-    return userInput;
-}
+        return userInput;
+    }
 
     void setUserAnswer(char answer) {
-    questions[currentQuestionIndex].userAnswer = answer;
+        questions[currentQuestionIndex].userAnswer = answer;
     }
 
-    void handleSkippedQuestions() {
-        for (const auto& entry : skippedQuestions) {
-            int questionNumber = entry.first;
-            char userAnswer = entry.second;
+void handleSkippedQuestions() {
+    for (const auto& entry : skippedQuestions) {
+        int questionNumber = entry.first;
+        char userAnswer = entry.second;
 
-            cout << "Question " << questionNumber << ": " << questions[questionNumber - 1].question << endl;
-            cout << "Your Answer: " << userAnswer << endl;
-            cout << "------------------------" << endl;
+        cout << "Question " << questionNumber << ": " << questions[questionNumber - 1].question << endl;
+        cout << "Options:\n";
+        for (char option = 'A'; option <= 'D'; ++option) {
+            cout << option << ". " << questions[questionNumber - 1].options[option - 'A'] << endl;
         }
+        cout << "Your Answer: " << (userAnswer == 'S' ? "Skipped" : string(1, userAnswer)) << endl;
+        cout << "Correct Answer: " << questions[questionNumber - 1].correctOption << endl;
+        cout << "------------------------" << endl;
     }
+}
+
+
+
+
 
     const vector<Question>& getQuestions() const {
         return questions;
@@ -155,9 +166,24 @@ char getUserInput() const {
         return score;
     }
 
-    void moveNext() {
-        currentQuestionIndex++;
-        skippedQuestions[currentQuestionIndex + 1] = ' '; // Initialize the next question as skipped
+    void movePrevious() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            // Remove the skipped status when moving back
+            skippedQuestions.erase(currentQuestionIndex + 2);
+        }
+    }
+void moveNext() {
+    currentQuestionIndex++;
+    skippedQuestions[currentQuestionIndex] = questions[currentQuestionIndex - 1].userAnswer; // Store the user's answer
+}
+
+    void endQuiz() {
+        cout << "Quiz ended. Thank you for participating!\n";
+        // Calculate and display the final score
+        int finalScore = calculateScore();
+        cout << "Your final score: " << finalScore << " out of " << questions.size() << endl;
+        exit(0); // End the application
     }
 
     bool isTestComplete() const {
@@ -165,9 +191,8 @@ char getUserInput() const {
     }
 
     const map<int, char> getSkippedQuestions() const {
-    return skippedQuestions;
-}
-
+        return skippedQuestions;
+    }
 
     void clearSkippedQuestions() {
         skippedQuestions.clear();
@@ -186,166 +211,75 @@ int main() {
     AuthenticationSystem authSystem;
     QuestionManager questionManager;
 
-    cout << "Welcome to the Quiz Application!\n";
+    cout << ">>>>>>>>>>>>>>>>Welcome to the Quiz Application!<<<<<<<<<<<<<<<<<<<<<<<<\n";
+    cout << "These are the rules\n";
+    cout << "Click A B C or D to answer each question\n";
+    cout << "Click P for previous question, N for next question and E to end the quiz.\n";
+    cout << "Good Luck!!\n";
 
     char startQuizChoice;
-    cout << "Do you want to start the quiz? (Y/N): ";
-    cin >> startQuizChoice;
+    while (true) {
+        cout << "Do you want to start quiz? (Y/N): ";
+        cin >> startQuizChoice;
 
-    // Convert input to lowercase for easier comparison
-    startQuizChoice = tolower(startQuizChoice);
-        if ( startQuizChoice == 'y' ||  startQuizChoice == 'n') {
+        startQuizChoice = tolower(startQuizChoice);
+
+        if (startQuizChoice == 'n') {
+            cout << "Aborted. Goodbye!!\n";
+            return 0;  // End the application
+        } else if (startQuizChoice == 'y') {
             break;
         } else {
             cout << "Invalid choice. Please enter 'Y' or 'N'.\n";
         }
     }
 
-    if startQuizChoice == 'n') {
-        cout << "Aborted. Goodbye!!\n";
-        return 0;  // End the application
-    }
+    // Get username and password from the user
+    string username, password;
+    cout << "Enter your username: ";
+    cin >> username;
+    cout << "Enter your password: ";
+    cin >> password;
 
-    if (viewResultChoice == 'y') {
-        // Get username and password from the user
-        string username, password;
-        cout << "Enter your username: ";
-        cin >> username;
-        cout << "Enter your password: ";
-        cin >> password;
-    }
-        // Authenticate user
-        if (authSystem.authenticateUser(username, password)) {
-            cout << "Authentication successful. Welcome, " << username << "!\n";
-            // Add code for the rest of your application here
-        } else {
-            cout << "Authentication failed. Invalid username or password.\n";
-        }
-    char userChoice;
-
-
-do {
-    // Display the current question
-    questionManager.displayCurrentQuestion();
-
-    // Allow users to input answers or skip the question
-    char userAnswer = questionManager.getUserInput();
-
-    if (userAnswer == 'S') {
-        cout << "Question skipped.\n";
+    // Authenticate user
+    if (authSystem.authenticateUser(username, password)) {
+        cout << "Authentication successful. Welcome, " << username << "!\n";
+        // Add code for the rest of your application here
     } else {
-        questionManager.setUserAnswer(userAnswer);
+        cout << "Authentication failed. Invalid username or password.\n";
+        return 1; // Exit the application if authentication fails
     }
 
-    // Provide the option to change the answer multiple times
     do {
-        cout << "Do you want to change your answer (C) or proceed to the next question (N)? ";
-        cin >> userChoice;
+        // Display the current question
+        questionManager.displayCurrentQuestion();
 
-        if (userChoice == 'C' || userChoice == 'c') {
-            // Re-display the current question and allow the user to change their answer
-            cout << "Current answer: " << questionManager.getQuestions()[questionManager.getCurrentQuestionIndex()].userAnswer << endl;
-            cout << "Enter your new answer (A, B, C, D): ";
-            cin >> userAnswer;
+        // Allow users to input answers or skip/navigate the questions
+        char userChoice = questionManager.getUserInput();
 
-            // Convert input to uppercase
-            userAnswer = toupper(userAnswer);
-
-            // Check if the input is valid
-            if (userAnswer >= 'A' && userAnswer <= 'D') {
-                // Update the user's answer
-                questionManager.setUserAnswer(userAnswer);
-            } else {
-                cout << "Invalid choice. Please enter a valid option.\n";
-            }
-        } else if (userChoice != 'N' && userChoice != 'n') {
-            cout << "Invalid choice. Please enter either 'C' to change your answer or 'N' to proceed to the next question.\n";
+        if (userChoice == 'P') {
+            questionManager.movePrevious();
+        } else if (userChoice == 'Q') {
+            questionManager.moveNext();
+        } else if (userChoice == 'E') {
+            questionManager.endQuiz();
+        } else {
+            questionManager.setUserAnswer(userChoice);
+            questionManager.moveNext();
         }
-    } while (userChoice != 'N' && userChoice != 'n');
-    // Move to the next question if the test is not complete
-    if (!questionManager.isTestComplete()) {
-        questionManager.moveNext();
+
+    } while (!questionManager.isTestComplete());
+
+    // Option to view the test script
+    cout << "Do you want to view your test script? (Y/N): ";
+    cin >> startQuizChoice;
+    if (startQuizChoice == 'Y' || startQuizChoice == 'y') {
+        questionManager.handleSkippedQuestions();
     }
 
-    // Check if the test is complete
-    if (questionManager.isTestComplete()) {
-        cout << "Test completed.\n";
-        break;
-    }
-
-    cout << "Do you want to continue to the next question? (Y/N): ";
-    cin >> userChoice;
-} while (userChoice == 'Y' || userChoice == 'y');
-
-
-// Option to view the test script
-cout << "Do you want to view your test script? (Y/N): ";
-cin >> userChoice;
-if (userChoice == 'Y' || userChoice == 'y') {
-    questionManager.handleSkippedQuestions();
-}
-
-// Allow users to return to skipped questions
-cout << "Do you want to go back to skipped questions? (Y/N): ";
-cin >> userChoice;
-
-
-
-while (userChoice == 'Y' || userChoice == 'y') {
-    // Get the skipped questions
-    map<int, char> skippedQuestions = questionManager.getSkippedQuestions();
-
-    // Check if there are any skipped questions
-    if (!skippedQuestions.empty()) {
-        // Find the first skipped question
-        auto it = skippedQuestions.begin();
-
-        // Set the current question index to the first skipped question
-        questionManager.setCurrentQuestionIndex(it->first - 1);
-
-        do {
-            // Display the skipped question
-            questionManager.displayCurrentQuestion();
-
-            // Allow users to input answers or skip the question
-            char userAnswer = questionManager.getUserInput();
-
-            if (userAnswer == 'S') {
-                cout << "Question skipped.\n";
-            } else {
-                questionManager.setUserAnswer(userAnswer);
-            }
-
-            // Remove the question from the skipped list
-            skippedQuestions.erase(it);
-
-            // Find the next skipped question
-            it = skippedQuestions.begin();
-            if (it == skippedQuestions.end()) {
-                cout << "No more skipped questions.\n";
-                break;
-            }
-
-            // Ask if the user wants to continue to the next skipped question
-            cout << "Do you want to go to the next skipped question? (Y/N): ";
-            cin >> userChoice;
-        } 
-    while (userChoice == 'Y' || userChoice == 'y');
-    } else {
-        cout << "No skipped questions.\n";
-        break;
-    }
-
-    // Ask if the user wants to go back to skipped questions
-    cout << "Do you want to go back to skipped questions? (Y/N): ";
-    cin >> userChoice;
-}
-
-// Calculate and display the final score
-int finalScore = questionManager.calculateScore();
-cout << "Your final score: " << finalScore << " out of " << questionManager.getQuestions().size() << endl;
-
-
+    // Calculate and display the final score
+    int finalScore = questionManager.calculateScore();
+    cout << "Your final score: " << finalScore << " out of " << questionManager.getQuestions().size() << endl;
 
     return 0;
 }
