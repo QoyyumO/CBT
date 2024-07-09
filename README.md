@@ -79,6 +79,13 @@ JohnDoe,password123
 5. **Final Score:**
     - Your score will be displayed at the end of the quiz.
 
+## Files
+
+- **main.cpp**: Contains the main code for the quiz application.
+- **questions.csv**: Stores the questions and answers for the quiz.
+- **users.csv**: Stores the user credentials for authentication.
+
+
 ## Sample CSV Files
 
 ### `questions.csv`
@@ -97,13 +104,6 @@ JaneDoe,password456
 Alice,pass789
 Bob,pass101
 ```
-## Files
-
-- **main.cpp**: Contains the main code for the quiz application.
-- **questions.csv**: Stores the questions and answers for the quiz.
-- **users.csv**: Stores the user credentials for authentication.
-
-### `questions.csv` Format
 
 
 
